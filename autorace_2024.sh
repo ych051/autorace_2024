@@ -99,6 +99,47 @@ sudo apt-get install -y ros-noetic-joy ros-noetic-teleop-twist-joy \
   ros-noetic-compressed-image-transport ros-noetic-rqt* ros-noetic-rviz \
   ros-noetic-gmapping ros-noetic-navigation ros-noetic-interactive-markers
 
+echo ""
+echo "[Note] Update opencv from 4.2.0 to 4.5.0"
+echo ""
+
+sudo apt-get update -y
+sudo apt-get install -y cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev build-essential
+cd ~
+git clone https://github.com/opencv/opencv.git
+git clone https://github.com/opencv/opencv_contrib.git
+cd opencv
+git checkout 4.5.0
+cd ../opencv_contrib
+git checkout 4.5.0
+
+cd ~/opencv
+mkdir build
+cd build
+cmake -D CMAKE_BUILD_TYPE=RELEASE \
+      -D CMAKE_INSTALL_PREFIX=/usr/local \
+      -D OPENCV_EXTRA_MODULES_PATH=~/opencv_contrib/modules \
+      -D ENABLE_NEON=ON \
+      -D ENABLE_VFPV3=ON \
+      -D WITH_CUDA=ON \
+      -D CUDA_ARCH_BIN=5.3 \
+      -D CUDA_ARCH_PTX="" \
+      -D WITH_CUDNN=ON \
+      -D OPENCV_DNN_CUDA=ON \
+      -D WITH_QT=OFF \
+      -D WITH_OPENGL=ON \
+      -D BUILD_EXAMPLES=OFF ..
+sudo make -j4  # '4'는 코어 개수에 맞게 조정
+sudo make install
+sudo ldconfig
+
+sudo touch /etc/ld.so.conf.d/opencv.conf
+sudo sh -c "echo \"/usr/local/lib\" >> /etc/ld.so.conf.d/opencv.conf"
+sudo ldconfig
+sudo sh -c "echo \"PKG_CONFIG_PATH=\$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig\" >> /etc/bash.bashrc"
+sudo sh -c "echo \"export PKG_CONFIG_PATH\" >> /etc/bash.bashrc"
+source /etc/bash.bashrc
+
 source $HOME/.bashrc
 echo "[Complete!!!]"
 exit 0
