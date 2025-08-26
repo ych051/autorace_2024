@@ -46,6 +46,8 @@ fi
 echo "[Update the package lists]"
 sudo apt update -y
 
+sudo apt install libudev-dev
+
 echo "[Install ros-desktop-full version of Noetic"
 sudo apt install -y ros-$name_ros_version-desktop-full
 
@@ -63,11 +65,13 @@ echo "[Initialize rosdep and Update]"
 sudo sh -c "rosdep init"
 rosdep update
 
+
 echo "[Make the catkin workspace and test the catkin_make]"
 mkdir -p $HOME/$name_catkin_workspace/src
 cd $HOME/$name_catkin_workspace/src
-git clone https://github.com/ROBOTIS-GIT/turtlebot3.git
-git clone https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git
+git clone -b noetic https://github.com/ROBOTIS-GIT/turtlebot3.git
+git clone -b noetic https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git
+git clone -b noetic https://github.com/ROBOTIS-GIT/ld08_driver.git
 git clone https://github.com/zhl017/autorace_idminer.git
 cd $HOME/$name_catkin_workspace
 catkin_make
@@ -85,9 +89,11 @@ sh -c "echo \"source /opt/ros/$name_ros_version/setup.bash\" >> ~/.bashrc"
 sh -c "echo \"source ~/$name_catkin_workspace/devel/setup.bash\" >> ~/.bashrc"
 
 sh -c "echo \"export MASTER_IP=localhost\" >> ~/.bashrc"
-sh -c "echo \"export ROS_MASTER_URI=http://192.168.123.2:11311\" >> ~/.bashrc"
-sh -c "echo \"export ROS_HOSTNAME=192.168.123.2\" >> ~/.bashrc"
+sh -c "echo \"export ROS_MASTER_URI=http://localhost:11311\" >> ~/.bashrc"
+sh -c "echo \"export ROS_HOSTNAME=localhost\" >> ~/.bashrc"
+
 sh -c "echo \"export TURTLEBOT3_MODEL=burger\" >> ~/.bashrc"
+sh -c "echo \"export LDS_MODEL=LDS-02\" >> ~/.bashrc"
 
 echo ""
 echo "[Note] Install Dependent ROS Packages"
@@ -131,7 +137,7 @@ cmake -D CMAKE_BUILD_TYPE=RELEASE \
       -D WITH_QT=OFF \
       -D WITH_OPENGL=ON \
       -D BUILD_EXAMPLES=OFF ..
-sudo make -j4  # '4'는 코어 개수에 맞게 조정
+sudo make -j8
 sudo make install
 sudo ldconfig
 
